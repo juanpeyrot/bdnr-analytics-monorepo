@@ -1,4 +1,8 @@
 analytics-api/dist
 analytics-api/node_modules
 analytics-api/.env
+
+analytics-dashboard/.vscode
+analytics-dashboard/node_modules
+
 .env
