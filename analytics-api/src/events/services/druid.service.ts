@@ -122,11 +122,8 @@ export class DruidService {
       this.logger.log(`✅ Ingestión enviada: ${response.data.task}`);
       return response.data;
     } catch (error) {
-      this.logger.error(
-        '❌ Error ingesting events',
-        error.response?.data || error.message,
-      );
-      throw new Error('Failed to ingest events into Druid');
+      this.logger.error('❌ Error ingesting events', error);
+      throw new Error('Failed to ingest events into Druid', error);
     }
   }
 
@@ -154,19 +151,36 @@ export class DruidService {
     `);
   }
 
-  async waitForDatasource(name: string, timeoutMs = 10000) {
+  async waitForDatasource(name: string, timeoutMs = 60000) {
     const start = Date.now();
+
     while (Date.now() - start < timeoutMs) {
       try {
+        const baseUrl = process.env.DRUID_HOST || 'http://localhost:8081';
         const res = await this.http.axiosRef.get(
-          `${process.env.DRUID_HOST || 'http://localhost'}:8081/druid/coordinator/v1/datasources`,
+          `${baseUrl}/druid/coordinator/v1/datasources`,
         );
-        if (res.data.includes(name)) return true;
-      } catch {
-        this.logger.warn('Waiting for Druid coordinator...');
+
+        this.logger.debug(
+          `🟡 Druid datasources response: ${JSON.stringify(res.data)}`,
+        );
+
+        if (Array.isArray(res.data)) {
+          const names = res.data.map((d: any) =>
+            typeof d === 'string' ? d : d.name,
+          );
+          if (names.includes(name)) {
+            this.logger.log(`✅ Datasource "${name}" disponible`);
+            return true;
+          }
+        }
+      } catch (err) {
+        this.logger.warn(`Waiting for Druid coordinator... ${err.message}`);
       }
+
       await new Promise((r) => setTimeout(r, 1000));
     }
+
     throw new Error(
       `Datasource "${name}" not available after ${timeoutMs / 1000}s`,
     );

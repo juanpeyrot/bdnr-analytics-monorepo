@@ -1,4 +1,4 @@
-version: '2.2'
+version: "3.8"
 
 volumes:
   metadata_data: {}
@@ -10,11 +10,12 @@ volumes:
   druid_shared: {}
 
 services:
+  # Base de datos para Druid
   postgres:
     container_name: postgres-druid
     image: postgres:17
     ports:
-      - '5432:5432'
+      - "5432:5432"
     volumes:
       - metadata_data:/var/lib/postgresql
     environment:
@@ -22,14 +23,16 @@ services:
       - POSTGRES_USER=druid
       - POSTGRES_DB=druid
 
+  # Zookeeper
   zookeeper:
     container_name: zookeeper
     image: zookeeper:3.5.10
     ports:
-      - '2181:2181'
+      - "2181:2181"
     environment:
       - ZOO_MY_ID=1
 
+  # Druid coordinator
   coordinator:
     image: apache/druid:34.0.0
     container_name: coordinator
@@ -40,9 +43,8 @@ services:
       - zookeeper
       - postgres
     ports:
-      - '8081:8081'
-    command:
-      - coordinator
+      - "8081:8081"
+    command: ["coordinator"]
     env_file:
       - .env
 
@@ -56,9 +58,8 @@ services:
       - postgres
       - coordinator
     ports:
-      - '8082:8082'
-    command:
-      - broker
+      - "8082:8082"
+    command: ["broker"]
     env_file:
       - .env
 
@@ -73,9 +74,8 @@ services:
       - postgres
       - coordinator
     ports:
-      - '8083:8083'
-    command:
-      - historical
+      - "8083:8083"
+    command: ["historical"]
     env_file:
       - .env
 
@@ -90,10 +90,9 @@ services:
       - postgres
       - coordinator
     ports:
-      - '8091:8091'
-      - '8100-8105:8100-8105'
-    command:
-      - middleManager
+      - "8091:8091"
+      - "8100-8105:8100-8105"
+    command: ["middleManager"]
     env_file:
       - .env
 
@@ -107,8 +106,35 @@ services:
       - postgres
       - coordinator
     ports:
-      - '8888:8888'
-    command:
-      - router
+      - "8888:8888"
+    command: ["router"]
     env_file:
       - .env
+
+  # API NestJS
+  analytics-api:
+    container_name: analytics-api
+    build:
+      context: ./analytics-api
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env
+    depends_on:
+      - router
+      - postgres
+    volumes:
+      - ./analytics-api:/usr/src/app
+      - /usr/src/app/node_modules
+    command: npm run start:dev
+    working_dir: /usr/src/app
+
+  # 🌐 FRONTEND (futuro)
+  # frontend:
+  #   build:
+  #     context: ./frontend
+  #   ports:
+  #     - '4200:4200'
+  #   depends_on:
+  #     - analytics-api
