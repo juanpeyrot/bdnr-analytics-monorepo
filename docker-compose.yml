@@ -130,11 +130,16 @@ services:
     command: npm run start:dev
     working_dir: /usr/src/app
 
-  # 🌐 FRONTEND (futuro)
-  # frontend:
-  #   build:
-  #     context: ./frontend
-  #   ports:
-  #     - '4200:4200'
-  #   depends_on:
-  #     - analytics-api
+  # FRONTEND
+  frontend:
+    container_name: analytics-frontend
+    build:
+      context: ./analytics-dashboard
+      dockerfile: Dockerfile
+    ports:
+      - "4200:4200"
+    depends_on:
+      - analytics-api
+    volumes:
+      - ./analytics-dashboard:/usr/src/app
+      - /usr/src/app/node_modules
