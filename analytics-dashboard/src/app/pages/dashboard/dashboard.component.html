@@ -266,4 +266,60 @@
       </div>
     </div>
   </div>
+
+  <!-- Floating Action Button -->
+  <button class="fab" (click)="toggleGeneratePanel()" [class.fab-open]="showGeneratePanel">
+    <svg
+      *ngIf="!showGeneratePanel"
+      xmlns="http://www.w3.org/2000/svg"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+    >
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+    </svg>
+    <svg
+      *ngIf="showGeneratePanel"
+      xmlns="http://www.w3.org/2000/svg"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+    >
+      <path
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="2"
+        d="M6 18L18 6M6 6l12 12"
+      />
+    </svg>
+  </button>
+
+  <!-- Generate Events Panel -->
+  <div class="generate-panel" [class.panel-open]="showGeneratePanel">
+    <h3>Generar Eventos</h3>
+    <p class="panel-description">Genera eventos de prueba para el dashboard</p>
+
+    <div class="input-group">
+      <label for="eventCount">Cantidad de eventos:</label>
+      <input
+        id="eventCount"
+        type="number"
+        [(ngModel)]="eventCount"
+        min="1"
+        max="10000"
+        [disabled]="generating"
+      />
+    </div>
+
+    <button class="generate-btn" (click)="generateEvents()" [disabled]="generating">
+      <span *ngIf="!generating">Generar</span>
+      <span *ngIf="generating" class="generating-loader">
+        <span class="spinner-small"></span>
+        Generando...
+      </span>
+    </button>
+  </div>
+
+  <!-- Overlay -->
+  <div class="overlay" *ngIf="showGeneratePanel" (click)="toggleGeneratePanel()"></div>
 </div>

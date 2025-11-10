@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { Summary, UserActivity } from '../../models/analytics.models';
 import { ChartData, ChartOptions } from 'chart.js';
 import { NgChartsModule } from 'ng2-charts';
@@ -38,7 +39,7 @@ Chart.register(
 @Component({
   selector: 'app-analytics-dashboard',
   standalone: true,
-  imports: [CommonModule, NgChartsModule],
+  imports: [CommonModule, FormsModule, NgChartsModule],
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.scss'],
 })
@@ -47,6 +48,9 @@ export class DashboardComponent implements OnInit {
   summary: Summary | null = null;
   userActivity: UserActivity[] = [];
   loading = true;
+  generating = false;
+  showGeneratePanel = false;
+  eventCount = 100;
 
   // Gráfico de barras para eventos por tipo
   eventsChartData: ChartData<'bar'> = {
@@ -588,5 +592,32 @@ export class DashboardComponent implements OnInit {
     const maxEvents = this.userActivity[0].events;
     if (maxEvents === 0) return 0;
     return (user.events / maxEvents) * 100;
+  }
+
+  toggleGeneratePanel() {
+    this.showGeneratePanel = !this.showGeneratePanel;
+  }
+
+  generateEvents() {
+    if (this.eventCount <= 0 || this.eventCount > 10000) {
+      alert('Por favor ingresa un número entre 1 y 10000');
+      return;
+    }
+
+    this.generating = true;
+    this.svc.generateEvents(this.eventCount).subscribe({
+      next: (response) => {
+        console.log('✅ Eventos generados:', response);
+        this.generating = false;
+        this.showGeneratePanel = false;
+        // Recargar los datos del dashboard
+        this.loadAll();
+      },
+      error: (err) => {
+        console.error('❌ Error generando eventos:', err);
+        this.generating = false;
+        alert('Error al generar eventos');
+      },
+    });
   }
 }
