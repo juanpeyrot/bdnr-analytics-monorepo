@@ -12,10 +12,11 @@ import {
   CountryCount,
   TopExercise,
 } from '../models/analytics.models';
+import { environment } from '../environments';
 
 @Injectable({ providedIn: 'root' })
 export class AnalyticsService {
-  private base = 'http://localhost:3000';
+  private base = environment.BACKEND_URL;
 
   constructor(private http: HttpClient) {}
 
