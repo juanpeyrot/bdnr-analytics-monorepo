@@ -1,9 +1,7 @@
 import axios from 'axios';
 
-// URL de ingestion (cambia según tu entorno Druid)
 const DRUID_INGEST_URL = 'http://localhost:8888/druid/v2/sql/task';
 
-// Función que genera un evento aleatorio
 function generateEvent(i) {
   const users = ['U001', 'U002', 'U003', 'U004'];
   const courses = ['C001', 'C002', 'C003'];
@@ -35,10 +33,8 @@ function generateEvent(i) {
   };
 }
 
-// Generar 100 eventos
-const events = Array.from({ length: 200 }, (_, i) => generateEvent(i));
+const events = Array.from({ length: 150 }, (_, i) => generateEvent(i));
 
-// Enviar a Druid a través de tu API Nest (más recomendable)
 const sendToApi = async () => {
   try {
     const res = await axios.post('http://localhost:3000/events', events);
